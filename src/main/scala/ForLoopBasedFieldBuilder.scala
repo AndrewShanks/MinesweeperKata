@@ -6,12 +6,14 @@ object ForLoopBasedFieldBuilder extends  FieldBuilder{
       if(lines(y)(x) == '*'){
         "*"
       } else {
-        (minesOnPoint(x-1,y) + minesOnPoint(x+1,y)).toString
+        (minesOnPoint(x-1,y-1) + minesOnPoint(x,y-1) + minesOnPoint(x+1, y-1) +
+          minesOnPoint(x-1,y) + minesOnPoint(x+1,y) +
+          minesOnPoint(x-1, y+1) + minesOnPoint(x, y+1) + minesOnPoint(x+1, y+1)).toString
       }
     }
 
     def minesOnPoint(x:Int, y:Int): Int = {
-      if ( x < 0 || x >= lines(y).length ){
+      if ( y< 0 || y >= lines.length || x < 0 || x >= lines(y).length ){
         0
       } else if ( lines(y)(x) == '*'){
         1
@@ -23,8 +25,11 @@ object ForLoopBasedFieldBuilder extends  FieldBuilder{
     if(!isInputValid(lineCount, columnCount, lines)){
       Left("Invalid input")
     } else {
-      val columnIndexes = 0 to columnCount-1
-      Right(Seq(columnIndexes.foldLeft("")((acc, ind)=> acc + getPointValue(ind, 0))))
+      val rowIndices = 0 until lineCount
+      val columnIndices = 0 to columnCount-1
+      Right(
+        rowIndices.foldLeft(Seq():Seq[String])((row_acc, row_ind) => row_acc :+ columnIndices.foldLeft("")((acc, col_ind)=> acc + getPointValue(col_ind, row_ind)))
+      )
     }
   }
 
