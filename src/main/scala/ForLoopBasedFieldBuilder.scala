@@ -2,18 +2,28 @@
 object ForLoopBasedFieldBuilder extends  FieldBuilder{
   def buildField(lineCount:Integer, columnCount: Integer, lines:Seq[String]):Either[String,Seq[String]] = {
 
-    def getPointValue(x:Int, y:Int):String = {
+    val MINE = -1
+
+    def calculatePointValue(x:Int, y:Int):Int = {
       if(lines(y)(x) == '*'){
+        MINE
+      } else {
+        minesOnPoint(x-1,y-1) + minesOnPoint(x,y-1) + minesOnPoint(x+1, y-1) +
+          minesOnPoint(x-1,y) + minesOnPoint(x+1,y) +
+          minesOnPoint(x-1, y+1) + minesOnPoint(x, y+1) + minesOnPoint(x+1, y+1)
+      }
+    }
+
+    def determineRepresentation(pointValue: Int):String = {
+      if(pointValue == MINE) {
         "*"
       } else {
-        (minesOnPoint(x-1,y-1) + minesOnPoint(x,y-1) + minesOnPoint(x+1, y-1) +
-          minesOnPoint(x-1,y) + minesOnPoint(x+1,y) +
-          minesOnPoint(x-1, y+1) + minesOnPoint(x, y+1) + minesOnPoint(x+1, y+1)).toString
+        pointValue.toString
       }
     }
 
     def minesOnPoint(x:Int, y:Int): Int = {
-      if ( y< 0 || y >= lines.length || x < 0 || x >= lines(y).length ){
+      if ( y < 0 || y >= lines.length || x < 0 || x >= lines(y).length ){
         0
       } else if ( lines(y)(x) == '*'){
         1
@@ -26,9 +36,14 @@ object ForLoopBasedFieldBuilder extends  FieldBuilder{
       Left("Invalid input")
     } else {
       val rowIndices = 0 until lineCount
-      val columnIndices = 0 to columnCount-1
+      val columnIndices = 0 until columnCount
+
+      val numericField: Seq[Seq[Int]] = rowIndices.map( row_ind =>
+        columnIndices.map( col_ind => calculatePointValue(col_ind, row_ind))
+      )
+
       Right(
-        rowIndices.foldLeft(Seq():Seq[String])((row_acc, row_ind) => row_acc :+ columnIndices.foldLeft("")((acc, col_ind)=> acc + getPointValue(col_ind, row_ind)))
+        numericField.foldLeft(Seq():Seq[String])((row_acc, row) => row_acc :+ row.foldLeft("")((col_acc, col)=> col_acc + determineRepresentation(col)))
       )
     }
   }
