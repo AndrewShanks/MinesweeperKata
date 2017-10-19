@@ -32,6 +32,10 @@ object ForLoopBasedFieldBuilder extends  FieldBuilder{
       }
     }
 
+    def buildRowString(row:Seq[Int]) : String = {
+      row.foldLeft("")((col_acc, col)=> col_acc + determineRepresentation(col))
+    }
+
     if(!isInputValid(lineCount, columnCount, lines)){
       Left("Invalid input")
     } else {
@@ -43,11 +47,10 @@ object ForLoopBasedFieldBuilder extends  FieldBuilder{
       )
 
       Right(
-        numericField.foldLeft(Seq():Seq[String])((row_acc, row) => row_acc :+ row.foldLeft("")((col_acc, col)=> col_acc + determineRepresentation(col)))
+        numericField.foldLeft(Seq():Seq[String])((row_acc, row) => row_acc :+ buildRowString(row))
       )
     }
   }
-
 
   private def isInputValid(lineCount:Integer, columnCount: Integer, lines:Seq[String]) = {
     lineCount > 0 && columnCount > 0 && lines.nonEmpty && lines.size == lineCount && lines.forall(line => line.length == columnCount)
